@@ -32,7 +32,7 @@
 ;;
 
 (ns euler011
-  (:use [clojure.string]))
+  (:use [clojure.string :only [split]]))
 
 (defn load-data [fname]
   (map #(Integer/parseInt %) (split (slurp fname) #"\W")))
