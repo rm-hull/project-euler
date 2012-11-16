@@ -25,20 +25,19 @@
 
 (def collatz-length
   (memoize 
-    (fn [n]
+    (fn [^long n]
       (cond
         (<= n 0)  0
         (= n 1)   1
-        (even? n) (inc (collatz-length (/ n 2)))
+        (even? n) (inc (collatz-length (quot n 2)))
         :else     (inc (collatz-length (inc (* 3 n))))))))
 
-(defn to-tuple [n]
-  [n (collatz-length n)])
-
-(defn maxf [a b]
-  (if (> (second a) (second b)) a b))
-
 (defn solve [n]
-  (first (reduce maxf (map to-tuple (range 1 n)))))
+  (letfn [(tuple [n] [n (collatz-length n)])
+          (maxf [a b] (if (> (second a) (second b)) a b))]
+    (->> (range 1 n)
+         (map tuple)
+         (reduce maxf)
+         first)))
 
 (time (solve 1000000))
