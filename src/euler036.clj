@@ -11,29 +11,21 @@
 ;;
 
 (ns euler036
-  (:use [util.palindromes]))
-
-(set! *warn-on-reflection* true)
-
-(defn to-binary [^long n]
-  (if (zero? n)
-    (list 0)
-    (loop [n n
-           bits nil]
-      (if (zero? n)
-        bits
-        (recur (quot n 2) (cons (rem n 2) bits))))))
+  (:use [util.palindromes]
+        [util.misc]))
 
 (defn palindromic-in-both-bases? [^long n]
   (and
     (is-palindrome? n)
-    (is-palindrome? (to-binary n))))
+    (is-palindrome? (digits n 2))))
 
 ; Only have to test odd numbers, since an even number [in binary] 
 ; will always end in zero, and since can never start with zero, by
 ; default cannot be palindromic
 
 (defn solve []  
-  (reduce + (filter palindromic-in-both-bases? (range 1 1000000 2))))
+  (->> (range 1 1000000 2)
+       (filter palindromic-in-both-bases?)
+       (reduce +)))
 
 (time (solve))
