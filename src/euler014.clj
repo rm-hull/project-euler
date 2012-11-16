@@ -7,7 +7,7 @@
 ;;    n --> 3n + 1 (n is odd)
 ;;
 ;; Using the rule above and starting with 13, we generate the following
-;;sequence:
+;; sequence:
 ;;
 ;;     13  40  20  10  5  16  8  4  2  1
 ;;
