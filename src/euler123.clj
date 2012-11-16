@@ -19,11 +19,11 @@
     2
     (mod (* 2 n a) (* a a))))
 
-(defn solve []
+(defn solve [n]
   (->> (map vector integers primes)
        (filter #(odd? (first %)))
        (map #(vector (first %) (remainder %)))
-       (drop-while #(< (second %) 1e10))
+       (drop-while #(< (second %) n))
        first))
 
-(time (solve))
+(time (solve 1e10))
