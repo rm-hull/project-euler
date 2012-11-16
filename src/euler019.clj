@@ -27,17 +27,15 @@
 (def months
   (cycle (list :jan :feb :mar :apr :may :jun :jul :aug :sep :oct :nov :dec)))
 
-(defn leap-year-calc [y]
-  (let [is-leap-year? (fn [y] 
-                        (and
-                          (zero? (mod y 4))
-                          (or 
-                            (pos? (mod y 100))
-                            (zero? (mod y 400)))))]
-    (if (is-leap-year? y) 29 28)))
+(defn leap-year? [y] 
+  (and
+    (zero? (mod y 4))
+    (or 
+      (pos? (mod y 100))
+      (zero? (mod y 400)))))
 
 (defn days-in-month [m y]
-  (let [num-days {:jan 31, :feb (leap-year-calc y), :mar 31,
+  (let [num-days {:jan 31, :feb (if (leap-year? y) 29 28) , :mar 31,
                   :apr 30, :may 31, :jun 30,
                   :jul 31, :aug 31, :sep 30,
                   :oct 31, :nov 30, :dec 31}]
@@ -47,15 +45,13 @@
   (fnext (drop-while #(not (= % m)) months)))
 
 (defn dates-from [d m y]
-  (let [rollover-month? (>= d (days-in-month m y))
-        rollover-year? (and rollover-month? (= m :dec))
-        new-day   (if rollover-month? 1 (inc d)) 
-        new-month (if rollover-month? (next-month m) m) 
-        new-year  (if rollover-year?  (inc y) y)]
-    (lazy-cat [[d m y]] (dates-from new-day new-month new-year))))
-
-(defn join [day [d m y]]
-  [day d m y])
+  (lazy-seq
+    (let [rollover-month? (>= d (days-in-month m y))
+          rollover-year? (and rollover-month? (= m :dec))
+          new-day   (if rollover-month? 1 (inc d)) 
+          new-month (if rollover-month? (next-month m) m) 
+          new-year  (if rollover-year?  (inc y) y)]
+      (cons [d m y] (dates-from new-day new-month new-year)))))
 
 (defn entry-criteria [[day [d m y]]] 
   (not
