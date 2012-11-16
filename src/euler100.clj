@@ -15,17 +15,19 @@
 ;; discs that the box would contain.
 ;;
 
+(ns euler100)
+
 (def pairs-seq
   (letfn [(next-pair [b n] 
-            (cons {:blue b, :total n} 
-                  (lazy-seq 
+            (lazy-seq 
+              (cons {:blue b, :total n} 
                     (next-pair 
                       (+ (* 3 b) (* 2 n) -2) 
                       (+ (* 4 b) (* 3 n) -3)))))]
     (next-pair 1 1)))
 
-(defn solve []
+(defn solve [n]
   (first 
-    (drop-while #(< (:total %) 1000000000000) pairs-seq)))
+    (drop-while #(< (:total %) n) pairs-seq)))
 
-(time (solve))
+(time (solve 1e12))
