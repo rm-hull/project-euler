@@ -5,7 +5,7 @@
 ;;
 
 (ns euler013
-  (:use [clojure.string]))
+  (:use [clojure.string :only [split-lines]]))
 
 (defn add-from-file [fname]
   (reduce + (map read-string (split-lines (slurp fname)))))
