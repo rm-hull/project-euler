@@ -16,9 +16,12 @@
   (:use [util.misc]))
  
 (defn to-units [n]
-  (let [digits (map char-to-int (reverse (str n)))]
-    (reverse (filter pos? (map #(* %1 (iexpt 10 %2)) digits (iterate inc 0))))))
- 
+  (let [rdig (reverse (digits n))]
+    (->> (reductions * 1 (repeat 10))
+         (map * rdig)
+         (filter pos?)
+          reverse)))
+
 (defn say [n]
   (let [units (to-units n) 
         words {0 nil
@@ -71,5 +74,3 @@
 
 (time (solve))
  
- 
-
