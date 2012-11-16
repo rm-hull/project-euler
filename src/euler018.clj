@@ -35,7 +35,7 @@
 ;;
 
 (ns euler018
-  (:use [clojure.string]
+  (:use [clojure.string :only [split split-lines]]
         [util.misc]))
 
 (defn get-triangle [fname]
