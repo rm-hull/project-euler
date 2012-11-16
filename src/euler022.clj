@@ -13,20 +13,22 @@
 ;;
 
 (ns euler022
-  (:use [clojure.string]
+  (:use [clojure.string :only [split]]
         [util.misc]))
 
 (defn get-data [fname]
   (sort (split (slurp fname) #",")))
 
 (defn name-score [idx nm]
-  (let [v (reduce + (map #(- (int %) 64) (filter #(not= % \") nm)))]
-    (* v idx)))
+  (->> nm
+       (remove #(= % \"))
+       (map #(- (int %) 64))
+       (reduce +)
+       (* idx)))
 
 (defn solve [fname]
   (reduce + 
-    (map name-score
-         integers
-         (get-data fname))))
+    (map name-score integers (get-data fname))))
 
 (time (solve "data/names.txt"))
+
