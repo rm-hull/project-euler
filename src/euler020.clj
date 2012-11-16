@@ -11,8 +11,7 @@
 
 (defn solve [n]
   (->> (nth factorial-seq n)
-       str
-       (map char-to-int)
+       digits
        (reduce +)))
  
 (time (solve 100))
