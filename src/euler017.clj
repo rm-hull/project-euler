@@ -20,7 +20,7 @@
     (->> (reductions * 1 (repeat 10))
          (map * rdig)
          (filter pos?)
-          reverse)))
+         reverse)))
 
 (defn say [n]
   (let [units (to-units n) 
