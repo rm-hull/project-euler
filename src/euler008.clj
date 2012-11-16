@@ -26,22 +26,21 @@
 ;; [loaded from 'data/1000-digit-number.txt']
 ;;
  
-(ns euler008)
+(ns euler008
+  (:use [util.misc]))
 
-(defn char-to-num [c]
-  (cond
-    (Character/isDigit c) (- (int c) (int \0))
-    :else -1))
- 
 (defn get-digits [fname]
-  (filter #(>= % 0) (map char-to-num (seq (slurp fname)))))
- 
+  (->> (slurp fname)
+       (apply str)
+       seq
+       (map char-to-num)
+       (remove neg?)))
+
 (defn solve [fname window]
-  (loop [data (get-digits fname)
-         r 0]
-    (cond
-      (empty? data) r
-      :else (recur (rest data) (max r (reduce * (take window data)))))))
- 
+  (->> (get-digits fname)
+       (partition window 1) 
+       (map (partial reduce *))
+       (reduce max)))
+
 (time (solve "data/1000-digit-number.txt" 5))
 
