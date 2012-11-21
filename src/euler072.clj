@@ -18,12 +18,6 @@
 (ns euler072
   (:use [util.primes]))
 
-(defn phi ^long [n]
-  (->> (prime-factors-of n)
-       (distinct)
-       (map #(- 1 (/ 1 %)))
-       (reduce * n)))
-
 (defn calc [coll]
   (reduce + (map phi coll)))
 
