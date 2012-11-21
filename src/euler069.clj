@@ -24,12 +24,6 @@
 (ns euler069
   (:use [util.primes]))
 
-(defn phi [n]
-  (->> (prime-factors-of n)
-       (distinct)
-       (map #(- 1 (/ 1 %)))
-       (reduce * n)))
-
 (defn solve [n] 
   (->>
     (range 2 (inc n))
