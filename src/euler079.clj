@@ -13,14 +13,13 @@
 ;; unknown length.
 ;;
 
-(use '[clojure.string :only (split-lines split)])
-(use 'clojure.set)
-
-(defn char-num [c]
-  (- (int c) 48))
-
+(ns euler079
+  (:use [util.misc]
+        [clojure.string :only (split-lines split)]
+        [clojure.set]))
+        
 (defn get-data [fname]
-  (map #(map char-num (seq %)) 
+  (map #(map char-to-int (seq %)) 
            (split-lines (slurp fname))))
 
 (defn possible-positions [data filter-fn]
