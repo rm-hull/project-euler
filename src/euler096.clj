@@ -231,11 +231,11 @@
    if a solution is found, else goes on to do a brute force depth-first
    search over the pruned search space."
   [grid]
-  (let [strategy-fn   (comp single-candidate-reduction hidden-single-reduction)
-        poss-solution (simple-solver strategy-fn grid)]
-    (if (solved? poss-solution)
-      poss-solution
-      (->> (what-if-solver strategy-fn grid)
+  (let [strategy-fn (comp single-candidate-reduction hidden-single-reduction)
+        first-pass  (simple-solver strategy-fn grid)]
+    (if (:solved first-pass)
+      first-pass
+      (->> (what-if-solver strategy-fn (:grid first-pass))
            (filter :solved)
            first))))
 
