@@ -13,8 +13,9 @@
 ;; least two positive integers?
 ;;
 
+(ns euler076)
 
-(defn count-partitions[c v]
+(defn count-partitions [c ^long v]
   (let [f (first c)]
     (if (= f 1) 
       1
@@ -26,26 +27,3 @@
   (count-partitions (range (dec n) 0 -1) n))
 
 (time (solve 100))
-
-
-(defn pentagonal-num [n] 
-  (/ (* n (dec (* 3 n))) 2))
-
-(def partition-seq
-  (let [pos-pentagonal (map pentagonal-num (iterate inc 1))
-        neg-pentagonal (map pentagonal-num (iterate dec -1))]
-    (interleave pos-pentagonal neg-pentagonal)))
-
-(defn partition-fn [n]
-  (cond
-    (neg? n)  0
-    (= n 1)   1
-    (odd? n)  (pentagonal-num (quot (inc n) 2))
-    (even? n) (pentagonal-num (quot (inc n) -2))))
-
-(def partition-seq2
-   (map partition-fn (iterate inc 1)))
-
-(take 30 partition-seq2)
-
-(take 30 partition-seq)
