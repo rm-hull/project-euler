@@ -1,10 +1,26 @@
 (ns util.primes)
 
-(defn gcd [a b] (if (zero? b) a (recur b (mod a b))))
+(defn gcd 
+  "Euclid's algorithm, is an efficient method for computing the greatest
+   common divisor (GCD) of two integers, also known as the greatest common
+   factor (GCF) or highest common factor (HCF). It is named after the Greek
+   mathematician Euclid, who described it in Books VII and X of his Elements."
+  [^long a ^long b] 
+  (if (zero? b) a (recur b (mod a b))))
 
-(defn lcm [a b] (/ (* a b) (gcd a b)))
+(defn lcm 
+  "The least common multiple (also called the lowest common multiple or 
+   smallest common multiple) of two integers a and b, usually denoted by
+   LCM(a, b), is the smallest positive integer that is divisible by both
+   a and b. If either a or b is 0, LCM(a, b) is defined to be zero."
+  [^long a ^long b] 
+  (quot (* a b) (gcd a b)))
 
-(defn coprime? [a b] (= 1 (gcd a b)))
+(defn coprime? 
+  "Two integers a and b are said to be coprime or relatively prime if
+   the only positive integer that evenly divides both of them is 1."
+  [^long a ^long b]
+  (= 1 (gcd a b)))
 
 (def is-prime?
   (memoize
@@ -65,13 +81,6 @@
   (->> (prime-factors-of n)
        frequencies
        (every? #(= (second %) 1))))
-  ;(let [sqrt (inc (long (Math/sqrt n)))]
-  ;  (->> (iterate inc 1)
-  ;       (filter odd?)
-  ;       (reductions +)
-  ;       next
-  ;       (take-while #(<= % n))
-  ;       (every? #(pos? (rem n %))))))
 
 (defn phi 
   "Euler's totient or phi function, φ(n) is an arithmetic function that
