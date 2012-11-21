@@ -100,42 +100,6 @@
          (take-nth 3)
          (apply concat))))
 
-;; Solver functions
-
-(defn complete-set? [coll]
-  (let [digits (apply union coll)
-        sum (reduce + digits)
-        product (reduce * digits)]
-    (and (= sum 45) (= product 362880))))
-
-(defn solved? 
-  "Checks to see if the grid is solved, that is, every cell has at most
-   one possible digit assigned, and that each row, column and box
-   contains the digits 1 through 9."
-  [grid]
-  (and 
-    (every? #(= 1 (count %)) grid)
-    (every? identity 
-            (for [i (range 9)]
-              (and 
-                (complete-set? (row grid i))
-                (complete-set? (column grid i))
-                (complete-set? (box grid i)))))))
-
-(defn simple-solver 
-  "Iteratively reduces down the named grid until either a solution is 
-   found (and the solution is returned) or successive reductions produce
-   no improvements."
-  [strategy-fn grid]
-  (loop [i         0
-         prev      nil 
-         solutions (iterate strategy-fn grid)]
-    (let [curr (first solutions)]
-      (cond 
-        (= prev curr)  { :solved false :iterations i :grid curr }
-        (solved? curr) { :solved true  :iterations i :grid curr }
-        :else          (recur (inc i) curr (next solutions))))))
-  
 ;; Strategies
 
 (defn known-digits [& groups]
@@ -211,6 +175,44 @@
        (filter #(> (count (:poss %)) 1))
        first)) 
 
+;; Termination functions
+
+(defn complete-set? [coll]
+  (let [digits (apply union coll)
+        sum (reduce + digits)
+        product (reduce * digits)]
+    (and (= sum 45) (= product 362880))))
+
+(defn solved? 
+  "Checks to see if the grid is solved, that is, every cell has at most
+   one possible digit assigned, and that each row, column and box
+   contains the digits 1 through 9."
+  [grid]
+  (and 
+    (every? #(= 1 (count %)) grid)
+    (every? identity 
+            (for [i (range 9)]
+              (and 
+                (complete-set? (row grid i))
+                (complete-set? (column grid i))
+                (complete-set? (box grid i)))))))
+
+;; Solver functions
+
+(defn simple-solver 
+  "Iteratively reduces down the named grid until either a solution is 
+   found (and the solution is returned) or successive reductions produce
+   no improvements."
+  [strategy-fn grid]
+  (loop [i         0
+         prev      nil 
+         solutions (iterate strategy-fn grid)]
+    (let [curr (first solutions)]
+      (cond 
+        (= prev curr)  { :solved false :iterations i :grid curr }
+        (solved? curr) { :solved true  :iterations i :grid curr }
+        :else          (recur (inc i) curr (next solutions))))))
+  
 (defn what-if-solver 
   "Performs a depth-first search of all the possible grids, returned as a
    lazy sequence. It is up to the consumer of the sequence to terminate
