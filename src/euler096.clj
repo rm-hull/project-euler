@@ -37,8 +37,9 @@
 ;;
 
 (ns euler096
-  (:use [clojure.string :only (split-lines split)]
-        [clojure.set :only (difference)]))
+  (:use [util.misc]
+        [clojure.string :only (split-lines split)]
+        [clojure.set :only (difference union)]))
 
 ;; Construction
 
@@ -75,49 +76,64 @@
 ;; Accessor functions
 
 (defn cell 
-  "Gryd the cell contents in the grid at the given position"
-  [grid x y]
-  (let [offset (+ x (* y 9))]
-    (nth grid offset)))
+  "Gets the cell contents in the grid at the given position"
+  ([grid ^long x ^long y] (cell grid (+ x (* y 9)))) 
+  ([grid ^long offset] (nth grid offset)))
 
-(defn row [grid y]
+(defn row [grid ^long y]
   "Gets the set of possible cell contents in the grid at the given row"
   (nth (partition 9 grid) y))
 
 (defn column 
   "Gets the set of possible cell contents in the grid at the given column"
-  [grid x]
+  [grid ^long x]
   (take-nth 9 (drop x grid)))
 
-(defn square 
-  "Gets the set of possible cell contents in the grid at the given square"
-  [grid x y]
-  (->> (nth (partition 27 grid) (quot y 3))
-       (partition 3)
-       (drop (quot x 3))
-       (take-nth 3)
-       (apply concat)))
+(defn box 
+  "Gets the set of possible cell contents in the grid at the given box, may
+   be referred to by a box number 0..8, or (x,y) co-ords."
+  ([grid ^long i] (box grid (* 3 (quot i 3)) (* 3 (rem i 3))))
+  ([grid ^long x ^long y]
+    (->> (nth (partition 27 grid) (quot y 3))
+         (partition 3)
+         (drop (quot x 3))
+         (take-nth 3)
+         (apply concat))))
 
 ;; Solver functions
 
+(defn complete-set? [coll]
+  (let [digits (apply union coll)
+        sum (reduce + digits)
+        product (reduce * digits)]
+    (and (= sum 45) (= product 362880))))
+
 (defn solved? 
   "Checks to see if the grid is solved, that is, every cell has at most
-   one possible digit assigned."
+   one possible digit assigned, and that each row, column and box
+   contains the digits 1 through 9."
   [grid]
-  (every? #(= 1 (count %)) grid))
+  (and 
+    (every? #(= 1 (count %)) grid)
+    (every? identity 
+            (for [i (range 9)]
+              (and 
+                (complete-set? (row grid i))
+                (complete-set? (column grid i))
+                (complete-set? (box grid i)))))))
 
-(defn solve 
+(defn simple-solver 
   "Iteratively reduces down the named grid until either a solution is 
    found (and the solution is returned) or successive reductions produce
    no improvements."
-  [func [name grid]]
+  [strategy-fn grid]
   (loop [i         0
          prev      nil 
-         solutions (iterate func grid)]
+         solutions (iterate strategy-fn grid)]
     (let [curr (first solutions)]
       (cond 
-        (solved? curr) { :name name :solved true  :iterations i :grid curr }
-        (= prev curr)  { :name name :solved false :iterations i :grid curr }
+        (= prev curr)  { :solved false :iterations i :grid curr }
+        (solved? curr) { :solved true  :iterations i :grid curr }
         :else          (recur (inc i) curr (next solutions))))))
   
 ;; Strategies
@@ -134,14 +150,14 @@
    the known digits in the current row, column and square. If there is 
    nothing to remove, nil is returned, otherwise the set of possible 
    digits is returned."
-  [grid x y]
+  [grid ^long x ^long y]
   (not-empty 
     (difference 
       (cell grid x y)
       (known-digits
         (row grid y)
         (column grid x)
-        (square grid x y)))))
+        (box grid x y)))))
 
 (defn single-candidate-reduction 
   "Reduces the elements in the grid where any cells which have only one 
@@ -150,9 +166,10 @@
   (vec 
     (for [y (range 9)
           x (range 9)
-          :let [curr (cell grid x y)
-                poss (valid-digits grid x y)]]
-     (if (nil? poss) curr poss))))
+          :let [curr (cell grid x y)]]
+      (if (= (count curr) 1)
+        curr
+        (if-let [poss (valid-digits grid x y)] poss curr)))))
 
 (defn number-frequencies 
   "Count the number of times each digit appears across all 
@@ -163,15 +180,15 @@
 (defn hidden-single 
   "Checks to see if any of the possible digits for cell at the given
    position is the only candidate, but is hidden among other candidates."
-  [grid x y]
-  (let [chk (fn [f digit] (= 1 (get (number-frequencies f) digits)))
-        unique (for [poss (cell grid x y)
-                     :when (or
-                             (chk (row grid y) poss)
-                             (chk (column grid x) poss)
-                             (chk (square grid x y) poss))]
-                 poss)]
-    (if (= (count unique) 1) (set unique))))
+  [grid ^long x ^long y]
+  (let [chk  (fn [f digit] (= 1 (get (number-frequencies f) digit)))
+        uniq (for [poss (cell grid x y)
+                   :when (or
+                           (chk (row grid y) poss)
+                           (chk (column grid x) poss)
+                           (chk (box grid x y) poss))]
+               poss)]
+    (if (= (count uniq) 1) (set uniq))))
 
 (defn hidden-single-reduction 
   "Reduces the elements in the grid where frequently, there is only one 
@@ -181,25 +198,57 @@
   (vec 
     (for [y (range 9)
           x (range 9)
-          :let [curr (cell grid x y)
-                poss (hidden-single grid x y)]]
-      (if (nil? poss) curr poss))))
+          :let [curr (cell grid x y)]]
+      (if (= (count curr) 1)
+        curr
+        (if-let [poss (hidden-single grid x y)] poss curr)))))
 
-; http://angusj.com/sudoku/hints.php
+(defn get-first-choice 
+  "Returns a map comprised of the first cell which has a choice of 
+   possible values, along with the offset in the grid."
+  [grid]
+  (->> (map #(hash-map :offset %1 :poss %2) (iterate inc 0) grid)
+       (filter #(> (count (:poss %)) 1))
+       first)) 
 
-;(defn generic-single-reduction [solvers grid]
-;  (for [y (range 9)
-;        x (range 9)
-;        :let [curr (cell grid x y)
-;              poss (some #(when (% grid x y)) solvers)]]
-;    (if (nil? poss) curr poss)))
+(defn what-if-solver 
+  "Performs a depth-first search of all the possible grids, returned as a
+   lazy sequence. It is up to the consumer of the sequence to terminate
+   iterating over the sequence on receipt of a completed solution. Note
+   that this is different to the simple solver implementation."
+  [strategy-fn grid] 
+  (let [choice (get-first-choice grid)
+        next-gen (for [poss (:poss choice)]
+                    (->> (assoc grid (:offset choice) (hash-set poss))
+                         (simple-solver strategy-fn)))]
+    (lazy-cat next-gen 
+              (mapcat #(what-if-solver strategy-fn (:grid  %)) next-gen)))) 
 
-(let [data     (load-data "data/sudoku.txt")
-      ;strategy (partial generic-single-reduction (list valid-digits hidden-single))]
-      strategy (comp single-candidate-reduction hidden-single-reduction)]
-  (doseq [soln (remove :solved (map (partial solve strategy) data))]
-    (prn soln))) 
+(defn sudoku-solver 
+  "Given a grid, applies a simple solver and returns the completed result
+   if a solution is found, else goes on to do a brute force depth-first
+   search over the pruned search space."
+  [grid]
+  (let [strategy-fn   (comp single-candidate-reduction hidden-single-reduction)
+        poss-solution (simple-solver strategy-fn grid)]
+    (if (solved? poss-solution)
+      poss-solution
+      (->> (what-if-solver strategy-fn grid)
+           (filter :solved)
+           first))))
 
+(defn top-left-digits 
+  "Strips the top-leftmost digits from the Sudoku grid, and converts to
+   a number"
+  [solution]
+  (->> (:grid solution)
+       (take 3)
+       (map first)
+       to-number)) 
 
+(defn solve []
+  (->> (vals (load-data "data/sudoku.txt"))
+       (pmap (comp top-left-digits sudoku-solver))
+       (reduce +)))
 
-;(solve (comp single-candidate-reduction hidden-single-reduction) ["Grid 03" grid3])
+(time (solve))
