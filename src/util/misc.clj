@@ -9,17 +9,17 @@
   (let [sqrt (Math/sqrt n)]
     (== sqrt (int sqrt))))
 
-(defn triangle [n] (/ (* n (inc n)) 2))
+(defn triangle [^long n] (quot (* n (inc n)) 2))
 
-(defn square [n] (* n n))
+(defn square [^long n] (* n n))
 
-(defn pentagon [n] (quot (* n (dec (* 3 n))) 2))
+(defn pentagon [^long n] (quot (* n (dec (* 3 n))) 2))
 
-(defn hexagon [n] (* n (dec (* 2 n))))
+(defn hexagon [^long n] (* n (dec (* 2 n))))
 
-(defn heptagon [n] (quot (* n (- (* 5 n) 3)) 2))
+(defn heptagon [^long n] (quot (* n (- (* 5 n) 3)) 2))
 
-(defn octagon [n] (* n (- (* 3 n) 2)))
+(defn octagon [^long n] (* n (- (* 3 n) 2)))
 
 (defn number-seq [f] (map f integers))
 
