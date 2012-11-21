@@ -15,12 +15,10 @@
 ;; Find the least value of n for which p(n) is divisible by one million.
 ;;
 
-(defn pentagonal-num [n] 
-  (quot (* n (dec (* 3 n))) 2))
+(ns euler078
+  (:use [util.misc]))
 
 (def sgn (cycle '(1 -1)))
-
-(def integers (iterate inc 1))
 
 (def p 
   (memoize
@@ -29,8 +27,8 @@
         (= n 0) 1
         (neg? n) 0
         :else (letfn [(term [k]
-                        (+ (p (- n (pentagonal-num k)))
-                           (p (- n (pentagonal-num (- k))))))]
+                        (+ (p (- n (pentagon k)))
+                           (p (- n (pentagon (- k))))))]
                 (mod 
                   (reduce +
                     (take-while (comp not zero?)
@@ -39,8 +37,7 @@
 
 (defn solve []
   (first 
-    (for [i integers
-          :when (zero? (p i))]
+    (for [i integers :when (zero? (p i))]
       i)))
 
 (time (solve))
