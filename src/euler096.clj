@@ -204,14 +204,13 @@
    found (and the solution is returned) or successive reductions produce
    no improvements."
   [strategy-fn grid]
-  (loop [i         0
-         prev      nil 
+  (loop [prev      nil 
          solutions (iterate strategy-fn grid)]
     (let [curr (first solutions)]
       (cond 
-        (= prev curr)  { :solved false :iterations i :grid curr }
-        (solved? curr) { :solved true  :iterations i :grid curr }
-        :else          (recur (inc i) curr (next solutions))))))
+        (= prev curr)  { :solved false :grid curr }
+        (solved? curr) { :solved true  :grid curr }
+        :else          (recur curr (next solutions))))))
   
 (defn what-if-solver 
   "Performs a depth-first search of all the possible grids, returned as a
@@ -248,9 +247,17 @@
        (map first)
        to-number)) 
 
-(defn solve []
-  (->> (vals (load-data "data/sudoku.txt"))
+(defn solve [fname]
+  (->> (vals (load-data fname))
        (pmap (comp top-left-digits sudoku-solver))
        (reduce +)))
 
-(time (solve))
+(time (solve "data/sudoku.txt"))
+
+(def hardest-sudokus (vals (load-data "data/worlds-hardest-sudoku.txt")))
+
+(time 
+  (doseq [x (map sudoku-solver hardest-sudokus)]
+    (prn x)))
+
+
