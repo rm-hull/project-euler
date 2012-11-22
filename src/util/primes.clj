@@ -6,7 +6,7 @@
    factor (GCF) or highest common factor (HCF). It is named after the Greek
    mathematician Euclid, who described it in Books VII and X of his Elements."
   [^long a ^long b] 
-  (if (zero? b) a (recur b (mod a b))))
+  (if (zero? b) a (recur b (long (mod a b)))))
 
 (defn lcm 
   "The least common multiple (also called the lowest common multiple or 
