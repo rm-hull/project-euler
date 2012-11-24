@@ -61,8 +61,9 @@
     (map f (iterate inc 1))))
 
 (defn e [iterations]
-  (last 
-    (take iterations (infinite-continued-fraction-seq e-repeating-seq))))
+  (nth 
+    (infinite-continued-fraction-seq e-repeating-seq) 
+    (dec iterations)))
 
 (defn solve [iterations]
   (reduce + (map char-to-int (str (numerator (e iterations))))))
