@@ -75,14 +75,30 @@
 
 ;; Accessor functions
 
+(defn offset [^long x ^long y]
+  (+ x (* y 9)))
+
+(defn norm [^long x]
+  (* 3 (quot x 3)))
+
 (defn cell 
   "Gets the cell contents in the grid at the given position"
-  ([grid ^long x ^long y] (cell grid (+ x (* y 9)))) 
+  ([grid ^long x ^long y] (cell grid (offset x y))) 
   ([grid ^long offset] (nth grid offset)))
 
-(defn row [grid ^long y]
+(defn slice [grid ^long offset ^long size]
+  (subvec grid offset (+ offset size)))
+
+;; TODO: Change to to use subvec
+;(defn row 
+;  "Gets the set of possible cell contents in the grid at the given row"
+;  [grid ^long y]
+;  (nth (partition 9 grid) y))
+
+(defn row
   "Gets the set of possible cell contents in the grid at the given row"
-  (nth (partition 9 grid) y))
+  [grid ^long y]
+  (slice grid (* y 9) 9))
 
 (defn column 
   "Gets the set of possible cell contents in the grid at the given column"
@@ -94,11 +110,11 @@
    be referred to by a box number 0..8, or (x,y) co-ords."
   ([grid ^long i] (box grid (* 3 (quot i 3)) (* 3 (rem i 3))))
   ([grid ^long x ^long y]
-    (->> (nth (partition 27 grid) (quot y 3))
-         (partition 3)
-         (drop (quot x 3))
-         (take-nth 3)
+    (->> (range 3)
+         (map #(offset (norm x) (+ % (norm y))))
+         (map #(slice grid % 3))
          (apply concat))))
+
 
 ;; Strategies
 
@@ -198,12 +214,13 @@
                 (complete-set? (box grid i)))))))
 
 ;; Solver functions
+(def strategy-fn (comp single-candidate-reduction hidden-single-reduction))
 
 (defn simple-solver 
   "Iteratively reduces down the named grid until either a solution is 
    found (and the solution is returned) or successive reductions produce
    no improvements."
-  [strategy-fn grid]
+  [grid]
   (loop [prev      nil 
          solutions (iterate strategy-fn grid)]
     (let [curr (first solutions)]
@@ -217,26 +234,25 @@
    lazy sequence. It is up to the consumer of the sequence to terminate
    iterating over the sequence on receipt of a completed solution. Note
    that this is different to the simple solver implementation."
-  [strategy-fn grid] 
+  [grid] 
   (let [choice (get-first-choice grid)
         next-gen (for [poss (:poss choice)]
-                    (->> (assoc grid (:offset choice) (hash-set poss))
-                         (simple-solver strategy-fn)))]
+                    (simple-solver
+                      (assoc grid (:offset choice) (hash-set poss))))]
     (lazy-cat next-gen 
-              (mapcat #(what-if-solver strategy-fn (:grid  %)) next-gen)))) 
+              (mapcat #(what-if-solver (:grid  %)) next-gen)))) 
 
 (defn sudoku-solver 
   "Given a grid, applies a simple solver and returns the completed result
    if a solution is found, else goes on to do a brute force depth-first
    search over the pruned search space."
   [grid]
-  (let [strategy-fn (comp single-candidate-reduction hidden-single-reduction)
-        first-pass  (simple-solver strategy-fn grid)]
-    (if (:solved first-pass)
-      first-pass
-      (->> (what-if-solver strategy-fn (:grid first-pass))
-           (filter :solved)
-           first))))
+    (let [first-pass (simple-solver grid)]
+      (if (:solved first-pass)
+        first-pass
+        (->> (what-if-solver (:grid first-pass))
+             (filter :solved)
+             first))))
 
 (defn top-left-digits 
   "Strips the top-leftmost digits from the Sudoku grid, and converts to
@@ -259,5 +275,7 @@
 (time 
   (doseq [x (map sudoku-solver hardest-sudokus)]
     (prn x)))
+
+
 
 
