@@ -54,7 +54,7 @@
       (empty? active) pred
       (= (first active) stop-at) pred
       :else (let [curr (ffirst active)
-                  curr-length (inc (path-length pred curr))
+                  curr-length (path-length pred curr)
                   neighbours (remove-longer-paths pred (connecting-neighbours matrix neighbours-fn curr) curr-length)
                   next-gen (blend-in pred neighbours #(hash-map :predecessor curr :length (+ curr-length (second %))))
                   next-active (blend-in active neighbours #(+ curr-length (second %)))]
