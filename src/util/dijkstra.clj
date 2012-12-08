@@ -1,5 +1,6 @@
 (ns util.dijkstra
- (:use [clojure.string :only (split-lines split)]))
+ (:use [clojure.string :only (split-lines split)]
+       [clojure.data.priority-map]))
 
 (defmacro add-if [pred then-clause xs]
   `(if ~pred
@@ -49,7 +50,7 @@
    cells."
   [matrix neighbours-fn start stop-at]
   (loop [pred (hash-map start { :predecessor nil :length (weight matrix start) })
-         active (sorted-map start (weight matrix start))]
+         active (priority-map start (weight matrix start))]
     (cond
       (empty? active) pred
       (= (first active) stop-at) pred
