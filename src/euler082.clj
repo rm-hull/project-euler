@@ -29,28 +29,20 @@
            (add-if (< (rem p w) (dec w)) (inc p))
            (filter #(and (>= % 0) (< % (* w h))))))))
 
-(defn predecessors [fname]
-  (let [matrix    (get-data fname)
-        [w h]     (:size matrix)
-        last-elem (dec (* w h))] 
-    (->> (range 0 (* w h) w)
-         (pmap #(build-predecessors matrix neighbours % last-elem))
-         vec)))
-
-(defn solve [fname]
-  (let [predecessors (memoize build-predecessors)
-        matrix       (get-data fname)
-        [w h]        (:size matrix)
-        last-elem    (dec (* w h))]
+(defn min-path-length [matrix from]
+  (let [[w h] (:size matrix)
+        pred  (build-predecessors matrix neighbours from (dec (* w h)))]
     (reduce min
-      (for [from (range 0 (* w h) w)
-            to   (range (dec w) (* w h) w)]
-        (->> (get-path to (build-predecessors matrix neighbours from to))  
-             (map (partial weight matrix))        
+      (for [to (range (dec w) (* w h) w)]
+        (->> (get-path to pred)
+             (map (partial weight matrix))
              (reduce +))))))
 
-;(time (solve "data/5-matrix.txt"))
+(defn solve [fname]
+  (let [matrix (get-data fname)
+        [w h] (:size matrix)]
+    (->> (range 0 (* w h) w)
+         (pmap (partial min-path-length matrix))
+         (reduce min)))) 
 
-;(time (solve "data/80-matrix.txt"))
-
-;(predecessors "data/80-matrix.txt")
+(time (solve "data/80-matrix.txt"))
