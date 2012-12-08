@@ -87,7 +87,7 @@
 
 (defn minimum-spanning-tree [vertices edges]
   (loop [visited  (hash-set (first vertices))
-         vertices (dissoc vertices (first visited))
+         vertices (disj vertices (first visited))
          edges    edges 
          res      nil]
     (if (empty? vertices)
@@ -95,7 +95,7 @@
       (let [[a b] (pick-edge edges visited)]
         (recur 
           (conj visited (second a))
-          (disj vertices (first a))
+          (disj vertices (second a))
           (dissoc edges a)
           (assoc res a b))))))
 
