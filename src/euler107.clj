@@ -70,7 +70,7 @@
   (set (range 0 (count matrix))))
 
 (defn edges 
-  "Counts uni-directional edges between all points in the matrix"
+  "Collects all uni-directional edges between all vertices in the matrix"
   [matrix]
   (into (priority-map) 
     (for [u (vertices matrix)
@@ -86,12 +86,18 @@
   [edges]
   (reduce + (vals edges)))
 
-(defn pick-edge [edges visited]
+(defn pick-edge 
+  "Picks the first edge {u,v} with minimum weight where u has been visited
+   previously, but v has not"
+  [edges visited]
   (letfn [(pred [[[u v] _]] (and (visited u) (nil? (visited v))))]
     (first
       (filter pred edges))))
 
-(defn minimum-spanning-tree [vertices edges]
+(defn minimum-spanning-tree 
+  "Prim's algorithm for calculating the minimum spanning tree given a 
+   list of connected vertices and their edges."
+  [vertices edges]
   (loop [visited  (hash-set  (first vertices))
          res      (priority-map)]
     (if (= vertices visited)
@@ -105,7 +111,7 @@
   (let [matrix   (get-adjacency-matrix fname)
         vertices (vertices matrix)
         edges    (edges matrix)] 
-    (- (quot ( weight edges) 2)
+    (- (quot (weight edges) 2) ; divide by 2 because bi-directional weights
        (weight (minimum-spanning-tree vertices edges)))))
 
 (time (solve "data/7-network.txt"))
