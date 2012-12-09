@@ -69,47 +69,45 @@
 (defn vertices [matrix] 
   (set (range 0 (count matrix))))
 
-(defn edges [matrix]
+(defn edges 
+  "Counts uni-directional edges between all points in the matrix"
+  [matrix]
   (into (priority-map) 
     (for [u (vertices matrix)
-          v (range u (count matrix))
-          :let [weight (get-in matrix [u v])]
+          v (vertices matrix)
+          :let [weight (get-in matrix [v u])]
           :when (not= weight '-)]
         [[u v] weight])))
 
-(defn weight [edges]
+(defn weight 
+  "Totals the weight between all vertices; if bi-directional edges are
+   supplied it will be necessary to divide by two to get the correct
+   network weight."
+  [edges]
   (reduce + (vals edges)))
 
 (defn pick-edge [edges visited]
-  (letfn [(pred [[[u v] _]] (or (nil? (visited u)) (visited v)))]
+  (letfn [(pred [[[u v] _]] (and (visited u) (nil? (visited v))))]
     (first
-      (drop-while pred edges))))
+      (filter pred edges))))
 
 (defn minimum-spanning-tree [vertices edges]
-  (loop [visited  (hash-set (first vertices))
-         vertices (disj vertices (first visited))
-         edges    edges 
-         res      nil]
-    (if (empty? vertices)
+  (loop [visited  (hash-set  (first vertices))
+         res      (priority-map)]
+    (if (= vertices visited)
       res
       (let [[a b] (pick-edge edges visited)]
         (recur 
           (conj visited (second a))
-          (disj vertices (second a))
-          (dissoc edges a)
           (assoc res a b))))))
 
 (defn solve [fname]
   (let [matrix   (get-adjacency-matrix fname)
         vertices (vertices matrix)
         edges    (edges matrix)] 
-    (- (weight edges)
+    (- (quot ( weight edges) 2)
        (weight (minimum-spanning-tree vertices edges)))))
 
 (time (solve "data/7-network.txt"))
 
 (time (solve "data/40-network.txt"))
-
-(def m (get-adjacency-matrix "data/40-network.txt"))
-
-(weight  (edges m)) 
