@@ -1,7 +1,7 @@
 ;; EULER #188
 ;; ==========
 ;; The hyperexponentiation or tetration of a number a by a positive integer
-;;b, denoted by a↑↑b or ba, is recursively defined by:
+;; b, denoted by a↑↑b, is recursively defined by:
 ;;
 ;;    a↑↑1 = a,
 ;;    a↑↑(k+1) = a^(a↑↑k).
