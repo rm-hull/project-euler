@@ -37,7 +37,7 @@
   (let [modulus      (iexpt 10 digits)
         tetration-fn (partial (modular-power-generator modulus) n)]
     (loop [prev      nil
-           solutions (iterate tetration-fn 1)]
+           solutions (iterate tetration-fn n)]
       (if (= prev (first solutions))
         prev
         (recur
