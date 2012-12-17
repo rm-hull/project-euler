@@ -2,9 +2,9 @@
 ;; ==========
 ;; A natural number, N, that can be written as the sum and product of a 
 ;; given set of at least two natural numbers, {a1, a2, ... , ak} is called 
-;; a product-sum number: N = a1 + a2 + ... + ak = a1  a2  ...  ak.
+;; a product-sum number: N = a1 + a2 + ... + ak = a1 x a2 x ... x ak.
 ;;
-;; For example, 6 = 1 + 2 + 3 = 1  2  3.
+;; For example, 6 = 1 + 2 + 3 = 1 x 2 x 3.
 ;;
 ;; For a given set of size, k, we shall call the smallest N with this 
 ;; property a minimal product-sum number. The minimal product-sum numbers 
@@ -61,6 +61,7 @@
         [util.misc]))
 
 (prime-factors-of 60)
+(prime-factors-of 60)
 
 (reductions * (prime-factors-of 60))
 
@@ -73,6 +74,7 @@
      (filter #(< % 12))
      (map #(quot 12 %)))
 
+1,2,3,4
 
 
 ; 60 = 2 x 30
@@ -95,4 +97,4 @@
       y '(2 2 3)]
   [x y])
 
-(combinations '(2 2 3) 2)
+(combinations '(2 3 5) 3)
