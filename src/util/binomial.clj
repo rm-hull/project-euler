@@ -14,6 +14,3 @@
         (nth n)
         (nth k))))
 
-(defn count-permutations [xs]
-  (let [n (count (remove (partial = 1) xs))]
-    (choose (count xs) n)))

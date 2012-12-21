@@ -28,18 +28,7 @@
 ;;
 
 (ns euler116
-  (:use [util.misc]
-        [util.combinatorics]
-        [util.binomial]))
-
-(defn partitions 
-  ([n] (partitions n n)) 
-  ([n limit]
-    (if (zero? n)
-      [[]]
-      (for [x (range (min n limit) 0 -1)
-            p (partitions (- n x) x)]
-        (cons x p)))))
+  (:use [util.partition]))
 
 (defn f [xs allowed]
   (and 
