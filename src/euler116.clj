@@ -1,4 +1,4 @@
-;; EULER #088
+;; EULER #116
 ;; ==========
 ;; A row of five black square tiles is to have a number of its tiles 
 ;; replaced with coloured oblong tiles chosen from red (length two), 
