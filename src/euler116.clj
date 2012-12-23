@@ -15,7 +15,6 @@
 ;; And if blue tiles are chosen there are two ways.
 ;;
 ;;   -BBBB   BBBB-
-;;	
 ;;
 ;; Assuming that colours cannot be mixed there are 7 + 3 + 2 = 12 ways of 
 ;; replacing the black tiles in a row measuring five units in length.
