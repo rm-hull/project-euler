@@ -22,8 +22,7 @@
 ;; formed?
 ;;
 
-(ns euler173
-  (:use [util.misc]))
+(ns euler173)
 
 (defn square-laminae [^long start]
   (->>
