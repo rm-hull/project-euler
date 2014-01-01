@@ -13,3 +13,7 @@ namespace, with a 'solve' function. Some are 'work in progress'.
 Copyright © 2012 Richard Hull
 
 Distributed under the Eclipse Public License, the same as Clojure.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rm-hull/project-euler/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
